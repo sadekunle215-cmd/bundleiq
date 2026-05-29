@@ -4,11 +4,13 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use solana_sdk::{
     hash::Hash,
+    message::{v0, VersionedMessage},
     signature::Keypair,
     signer::Signer,
     system_instruction,
-    transaction::Transaction,
+    transaction::{Transaction, VersionedTransaction},
 };
+
 use tracing::info;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -31,18 +33,15 @@ impl JitoClient {
         }
     }
 
-    pub async fn get_tip_accounts(&self) -> Result<Vec<String>> {
+    pub async fn get_tip_floor(&self) -> Result<u64> {
         let url = format!("{}/api/v1/bundles/tip_floor", self.block_engine_url);
         let resp = self.http.get(&url).send().await?;
         let data: serde_json::Value = resp.json().await?;
-        let accounts = vec![
-            "96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5".to_string(),
-            "HFqU5x63VTqvQss8hp11i4wVV8bD44PvwucfZ2bU7gRe".to_string(),
-            "Cw8CFyM9FkoMi7K7Crf6HNQqf4uEMzpKw6QNghXLvLkY".to_string(),
-            "ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt13gdCTBL".to_string(),
-        ];
-        info!("Tip floor data: {:?}", data);
-        Ok(accounts)
+        let floor = data[0]["landed_tips_50th_percentile"]
+            .as_f64()
+            .unwrap_or(1000.0) as u64;
+        info!("[Jito] Tip floor: {} lamports", floor);
+        Ok(floor)
     }
 
     pub async fn submit_bundle(
@@ -66,12 +65,17 @@ impl JitoClient {
             .await?;
 
         let data: serde_json::Value = resp.json().await?;
+
+        if let Some(err) = data.get("error") {
+            return Err(anyhow::anyhow!("Jito error: {}", err));
+        }
+
         let bundle_id = data["result"]
             .as_str()
             .unwrap_or("unknown")
             .to_string();
 
-        info!("Bundle submitted: {}", bundle_id);
+        info!("[Jito] Bundle submitted: {}", bundle_id);
 
         Ok(BundleResult {
             bundle_id,
@@ -105,23 +109,32 @@ impl JitoClient {
     }
 }
 
-pub fn build_tip_transaction(
+pub fn build_versioned_transaction(
     payer: &Keypair,
-    tip_account: &str,
-    tip_lamports: u64,
+    to: &str,
+    lamports: u64,
     recent_blockhash: Hash,
-) -> Result<Transaction> {
-    let tip_pubkey = tip_account.parse()?;
+) -> Result<VersionedTransaction> {
+    let to_pubkey = to.parse()?;
     let ix = system_instruction::transfer(
         &payer.pubkey(),
-        &tip_pubkey,
-        tip_lamports,
+        &to_pubkey,
+        lamports,
     );
-    let tx = Transaction::new_signed_with_payer(
+    let message = v0::Message::try_compile(
+        &payer.pubkey(),
         &[ix],
-        Some(&payer.pubkey()),
-        &[payer],
+        &[],
         recent_blockhash,
-    );
+    )?;
+    let tx = VersionedTransaction::try_new(
+        VersionedMessage::V0(message),
+        &[payer],
+    )?;
     Ok(tx)
+}
+
+pub fn serialize_versioned(tx: &VersionedTransaction) -> Result<String> {
+    let bytes = bincode::serialize(tx)?;
+    Ok(bs58::encode(bytes).into_string())
 }
