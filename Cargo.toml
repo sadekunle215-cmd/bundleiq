@@ -31,3 +31,12 @@ opt-level = 3
 
 [dependencies.bs58]
 version = "0.5"
+
+[dependencies.actix-web]
+version = "4"
+
+[dependencies.actix-cors]
+version = "0.7"
+
+[dependencies.tokio-stream]
+version = "0.1"
