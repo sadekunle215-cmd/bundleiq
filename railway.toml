@@ -2,5 +2,5 @@
 builder = "nixpacks"
 
 [deploy]
-startCommand = "cargo build --release --bin server && ./target/release/server"
+startCommand = "cargo build --release --bin bundleiq --bin server && ./target/release/server"
 restartPolicyType = "always"
