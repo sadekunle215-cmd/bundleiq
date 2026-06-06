@@ -5,13 +5,16 @@ BundleIQ is a production-grade Solana transaction infrastructure stack built in 
 Built for the Superteam Nigeria Advanced Infrastructure Challenge.
 
 Live Frontend: https://bundleiq-s713.vercel.app
+
 API Backend: https://web-solanarpc.up.railway.app
+
 GitHub: https://github.com/sadekunle215-cmd/bundleiq
+
 Wallet: BKJpv6cGtaaH7fNMogZavxfczSXXb75cWBiDTWqGvDPz
 
 ---
 
-## 1. Overview
+## Overview
 
 On Solana, sending a transaction is only one small part of the story. A transaction passes through leader scheduling, TPU ingestion, block production, shred propagation, and multiple commitment stages before it is considered final.
 
@@ -29,7 +32,7 @@ Key capabilities:
 
 ---
 
-## 2. Live Demo
+##  Live Demo
 
 Frontend dashboard: https://bundleiq-s713.vercel.app
 
@@ -44,7 +47,7 @@ API endpoints:
 
 ---
 
-## 3. System Architecture
+##  System Architecture
 
 Seven isolated modules each owning one responsibility:
 
@@ -54,7 +57,7 @@ Data flow: slot stream -> leader analysis -> tip decision -> timing decision -> 
 
 ---
 
-## 4. Component Deep Dive
+##  Component Deep Dive
 
 ### src/config.rs
 Loads all environment variables at startup. Fails fast if required keys are missing. Supports KEYPAIR_BASE64 for cloud deployment.
@@ -82,7 +85,7 @@ React control panel on Vercel. Live slot counter, agent pipeline, output termina
 
 ---
 
-## 5. AI Agent System
+##  AI Agent System
 
 All three agents use GPT-4 at temperature 0.2. No hardcoded retry logic anywhere in the codebase.
 
@@ -103,7 +106,7 @@ Observation: On slot 465571667 attempt 2, autonomously escalated tip from 25000 
 
 ---
 
-## 6. Transaction Lifecycle
+##  Transaction Lifecycle
 
 submitted: bundle sent to Jito block engine, bundle ID received.
 processed: transaction in a block, not yet voted on.
@@ -113,7 +116,7 @@ failed: bundle rejected or dropped, Failure Reasoning Agent triggered.
 
 ---
 
-## 7. Failure Handling
+##  Failure Handling
 
 ### Failure Type 1: Transaction Decode Error
 Slots: 465568867, 465569397, 465572010
@@ -127,17 +130,21 @@ Agent: attempt 1 root cause identified, attempt 2 tip escalated 1.5x.
 
 ---
 
-## 8. Observed Behaviors and Lessons
+##  Observed Behaviors and Lessons
 
 Lesson 1: Processed for slot streaming, confirmed for blockhash, never finalized for either.
+
 Lesson 2: Jito block engine rejects devnet transactions. Mainnet credentials required.
+
 Lesson 3: Attempt number passed to agent causes strategy to escalate appropriately.
+
 Lesson 4: Live slot data is critical for timing agent to identify Jito leader windows.
+
 Lesson 5: GPT-4 tip decisions varied 5000 to 25000 lamports. Fixed tips overpay or underpay.
 
 ---
 
-## 9. README Questions
+## README Questions
 
 ### Q1: What does the delta between processed_at and confirmed_at tell you about network health?
 
@@ -153,7 +160,7 @@ The bundle is silently dropped. The block engine forwards bundles to the Jito le
 
 ---
 
-## 10. Setup
+## Setup
 
 git clone https://github.com/sadekunle215-cmd/bundleiq
 cd bundleiq
@@ -173,7 +180,7 @@ Minimum SOL required: 0.01 SOL on mainnet for tip payments and fees.
 
 ---
 
-## 11. Deployment
+## Deployment
 
 ### Backend (Railway)
 1. Connect GitHub repo to Railway
@@ -188,27 +195,40 @@ Minimum SOL required: 0.01 SOL on mainnet for tip payments and fees.
 
 ---
 
-## 12. Lifecycle Log Summary
+## Lifecycle Log Summary
 
 31 total entries across devnet and mainnet testing.
 All mainnet slots verifiable at https://explorer.solana.com
 
 Mainnet PROCESSED bundles:
+
 bundle_424653435 | slot 424,653,435 | tip 25,000 lamports
+
 bundle_424653705 | slot 424,653,705 | tip 25,000 lamports
+
 bundle_424653952 | slot 424,653,952 | tip 5,000 lamports
+
 bundle_424654131 | slot 424,654,131 | tip 10,000 lamports
+
 bundle_424654226 | slot 424,654,226 | tip 5,000 lamports
+
 bundle_424654331 | slot 424,654,331 | tip 5,000 lamports
+
 bundle_424654417 | slot 424,654,417 | tip 10,000 lamports
+
 bundle_424654504 | slot 424,654,504 | tip 10,000 lamports
+
 bundle_424654598 | slot 424,654,598 | tip 7,000 lamports
+
 bundle_424654682 | slot 424,654,682 | tip 5,000 lamports
+
 bundle_424654773 | slot 424,654,773 | tip 10,000 lamports
 
 Devnet failure cases (intentional fault injection):
 bundle_465568867 | decode error | agent recommended blockhash refresh
+
 bundle_465570414 | tip account write lock | agent identified root cause
+
 bundle_465571667 | tip account write lock | agent escalated tip 1.5x autonomously
 
 Full raw logs with commitment progression and agent reasoning in logs/lifecycle.jsonl
