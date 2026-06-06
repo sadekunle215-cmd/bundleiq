@@ -73,7 +73,7 @@ async fn main() -> Result<()> {
 
     // Step 4: Agent decides tip
     info!("[Agent:Tip] Deciding tip...");
-    let tip_lamports = agent.get_tip(current_slot, tip_floor, "medium").await?;
+    let tip_lamports = agent.get_tip(current_slot, tip_floor, "low").await?;
     info!("[Agent:Tip] Decided: {} lamports", tip_lamports);
 
     // Step 5: Agent decides timing
@@ -105,7 +105,7 @@ async fn main() -> Result<()> {
     let main_tx = build_versioned_transaction(
         &keypair,
         &keypair.pubkey().to_string(),
-        1000,
+        500,
         blockhash,
     )?;
 
