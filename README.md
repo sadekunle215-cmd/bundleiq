@@ -51,7 +51,19 @@ API endpoints:
 
 Seven isolated modules each owning one responsibility:
 
-Slot Streamer polls Solana RPC at processed commitment. Blockhash Fetcher fetches at confirmed commitment. Bundle Builder constructs versioned v0 transactions. Tip Intelligence Agent uses GPT-4 to decide tip amount. Submission Timing Agent uses GPT-4 to decide when to submit. Jito Client submits bundle and polls for status. Lifecycle Logger records every event to JSONL. Failure Reasoning Agent uses GPT-4 to classify failures and decide retries. API Server exposes all functionality via HTTP to the React frontend.
+Slot Streamer polls Solana RPC at processed commitment. Blockhash Fetcher fetches at confirmed commitment. 
+
+Bundle Builder constructs versioned v0 transactions. 
+
+Tip Intelligence Agent uses GPT-4 to decide tip amount. 
+
+Submission Timing Agent uses GPT-4 to decide when to submit. Jito Client submits bundle and polls for status. 
+
+Lifecycle Logger records every event to JSONL. 
+
+Failure Reasoning Agent uses GPT-4 to classify failures and decide retries. 
+
+API Server exposes all functionality via HTTP to the React frontend.
 
 Data flow: slot stream -> leader analysis -> tip decision -> timing decision -> blockhash fetch -> bundle build -> submission -> lifecycle log -> failure reasoning -> retry loop.
 
