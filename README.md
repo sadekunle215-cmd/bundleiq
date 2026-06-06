@@ -51,7 +51,7 @@ API endpoints:
 
 Seven isolated modules each owning one responsibility:
 
-Slot Streamer polls Solana RPC at processed commitment. Blockhash Fetcher fetches at confirmed commitment. 
+Slot Streamer polls Solana RPC at processed commitment,Blockhash Fetcher fetches at confirmed commitment. 
 
 Bundle Builder constructs versioned v0 transactions. 
 
@@ -121,9 +121,13 @@ Observation: On slot 465571667 attempt 2, autonomously escalated tip from 25000 
 ##  Transaction Lifecycle
 
 submitted: bundle sent to Jito block engine, bundle ID received.
+
 processed: transaction in a block, not yet voted on.
-confirmed: two thirds of stake has voted on the block.
+
+confirmed: two thirds of stake has voted on the block
+
 finalized: block is rooted, cannot be rolled back.
+
 failed: bundle rejected or dropped, Failure Reasoning Agent triggered.
 
 ---
@@ -131,13 +135,19 @@ failed: bundle rejected or dropped, Failure Reasoning Agent triggered.
 ##  Failure Handling
 
 ### Failure Type 1: Transaction Decode Error
+
 Slots: 465568867, 465569397, 465572010
+
 Cause: base64 vs bs58 encoding mismatch. Intentional fault injection.
+
 Agent: attempt 1 retry, attempt 2 blockhash refresh.
 
 ### Failure Type 2: Tip Account Write Lock
+
 Slots: 465570414, 465571667, 465572304
+
 Cause: Jito requires SOL transfer to official tip account.
+
 Agent: attempt 1 root cause identified, attempt 2 tip escalated 1.5x.
 
 ---
