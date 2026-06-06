@@ -1,7 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "cargo build --release --bin server"
 
 [deploy]
-startCommand = "./target/release/server"
+startCommand = "cargo build --release --bin server && ./target/release/server"
 restartPolicyType = "always"
